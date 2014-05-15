@@ -1,4 +1,4 @@
-goswift
-=======
+Go bindings to the OpenStack Object Storage API
+===============================================
 
-Go client for the OpenStack Object Storage(Swift) API.
+This is a go client for the OpenStack Object Storage(Swift) API.
