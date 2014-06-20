@@ -6,13 +6,11 @@ import (
 	"testing"
 )
 
-const (
-	AuthUrl     = ""
-	AccountName = ""
-	Password    = ""
-	StorageUrl  = ""
-	Token       = ""
-)
+var AuthUrl = os.Getenv("SWIFT_AUTH_URL")
+var AccountName = os.Getenv("SWIFT_API_USER")
+var Password = os.Getenv("SWIFT_API_KEY")
+var StorageUrl = os.Getenv("SWIFT_STORAGE_URL")
+var Token = os.Getenv("SWIFT_USER_TOKEN")
 
 // Account metadata operation
 func TestShowAccountMetaWithAuthUrl(t *testing.T) {

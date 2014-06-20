@@ -78,4 +78,20 @@ Example
     header, err := c.CreateObject("test", "test.json", "ton-katsu.json", metadata)
 
 
+> And more API ... Check GoDoc:  [https://godoc.org/github.com/ton-katsu/goswift](https://godoc.org/github.com/ton-katsu/goswift)
+
+Testing
+-------
+
+Set environment variables
+
+    export SWIFT_API_USER='accountname'
+    export SWIFT_API_KEY='password'
+    export SWIFT_AUTH_URL='https://xxxxx.com/auth/v1.0'
+    export SWIFT_USER_TOKEN='xxxxxxx'
+    export SWIFT_STORAGE_URL='https://xxxxx.com/v1/xxxxx'
+
+After that, run test.
+
+    go test -v
 
