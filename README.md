@@ -1,6 +1,7 @@
 Go bindings to the OpenStack Object Storage API
 ===============================================
 
+
 This is a go client for the OpenStack Object Storage(Swift) APIv1.
 
 [http://docs.openstack.org/api/openstack-object-storage/1.0/content/](http://docs.openstack.org/api/openstack-object-storage/1.0/content/)
@@ -9,6 +10,8 @@ This is a go client for the OpenStack Object Storage(Swift) APIv1.
 > Keystone(AuthV2) support comming soon.
 
 > "Transfer-Encoding: Chunked" support comming soon.
+
+[![GoDoc](https://godoc.org/github.com/ton-katsu/goswift?status.png)](https://godoc.org/github.com/ton-katsu/goswift)
 
 Install
 -------
