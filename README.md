@@ -87,15 +87,11 @@ Testing
 
 Set environment variables for Swauth(AuthV1)
 
-ex)
-
     export SWIFT_API_USER='accountname'
     export SWIFT_API_KEY='password'
     export SWIFT_AUTH_URL='https://xxxxx.com/auth/v1.0'
 
 Set environment variables for Keystone(AuthV2)
-
-ex)
 
     export SWIFT_API_USER='username'
     export SWIFT_API_KEY='password'
