@@ -16,6 +16,79 @@ import (
 
 const userAgent = "goswift/0.1"
 
+// Keystone request json
+type KeystoneV2Req struct {
+	Auth Credentials `json:"auth"`
+}
+
+type Credentials struct {
+	PasswordCredentials UserPass `json:"passwordCredentials"`
+	TenantName          string   `json:"tenantName"`
+}
+
+type UserPass struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// Keystoen respose json
+type KeystoneV2Res struct {
+	Access AccessInfo `json:"access"`
+}
+
+type AccessInfo struct {
+	Metadata       MetadataInfo      `json:"metadata"`
+	User           UserInfo          `json:"user"`
+	ServiceCatalog []ServiceCatalogs `josn:"serviceCatalog"`
+	Token          TokenInfo         `json:"token"`
+}
+
+type MetadataInfo struct {
+	Roles   []string `json:"roles"`
+	IsAdmin uint     `json:"is_admin"`
+}
+
+type UserInfo struct {
+	Name        string      `json:"name"`
+	Roles       []RolesInfo `json:"roles"`
+	Id          string      `json:"id"`
+	RolesLinkes []string    `json:"roles_links"`
+	Username    string      `json:"username"`
+}
+
+type RolesInfo struct {
+	Name string `json:"name"`
+}
+
+type ServiceCatalogs struct {
+	Name           string          `json:"name"`
+	Type           string          `json:"type"`
+	EndpointsLinks []string        `json:"endpoints_links"`
+	Endpoints      []EndpointsInfo `json:"endpoints"`
+}
+
+type EndpointsInfo struct {
+	PublicUrl   string `json:"publicURL"`
+	Id          string `json:"id"`
+	InternalURL string `json:"internalURL"`
+	Region      string `json:"region"`
+	AdminUrl    string `json:"adminURL"`
+}
+
+type TokenInfo struct {
+	Tenant   TenantInfo `json:"tenant"`
+	Id       string     `json:"id"`
+	Expires  string     `json:"expires"`
+	IssuedAt string     `json:"issued_at"`
+}
+
+type TenantInfo struct {
+	Name        string `json:"name"`
+	Id          string `json:"id"`
+	Enabled     bool   `json:"enabled"`
+	Description string `json:"description"`
+}
+
 type Client struct {
 	Client      *http.Client
 	AccountName string
@@ -23,6 +96,8 @@ type Client struct {
 	AuthUrl     string
 	StorageUrl  string
 	Token       string
+	TenantName  string
+	RegionName  string
 	SkipSecure  bool
 	ChunkSize   uint
 }
@@ -42,37 +117,56 @@ func (c *Client) SWAuthV1() error {
 	}
 	c.StorageUrl = res.Header["X-Storage-Url"][0]
 	c.Token = res.Header["X-Auth-Token"][0]
-	return nil
+	return err
 }
 
-func (c *Client) KeyStoneAuthV2() error {
-	// req, _ := http.NewRequest("GET", c.AuthUrl, nil)
-	// req.Header.Set("X-Auth-User", c.AccountName)
-	// req.Header.Set("X-Auth-Key", c.Password)
-	// req.Header.Set("User-Agent", userAgent)
-	// res, err := c.Client.Do(req)
-	// defer res.Body.Close()
-	// if err != nil {
-	// 	return err
-	// }
-	// if err := CheckResponse(res); err != nil {
-	// 	return err
-	// }
-	// c.StorageUrl = res.Header["X-Storage-Url"][0]
-	// c.Token = res.Header["X-Auth-Token"][0]
-	return nil
+func (c *Client) KeystoneAuthV2() error {
+	a := KeystoneV2Req{Credentials{UserPass{c.AccountName, c.Password}, c.TenantName}}
+	b, _ := json.Marshal(a)
+	req, _ := http.NewRequest("POST", AuthUrl, bytes.NewReader(b))
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Content-Type", "application/json")
+	res, err := c.Client.Do(req)
+	defer res.Body.Close()
+	if err != nil {
+		return err
+	}
+	if err := CheckResponse(res); err != nil {
+		return err
+	}
+
+	resbody, _ := ioutil.ReadAll(res.Body)
+	var keystonev2res KeystoneV2Res
+	err = json.Unmarshal(resbody, &keystonev2res)
+	if err != nil {
+		fmt.Println(err)
+	}
+	catalogList := keystonev2res.Access.ServiceCatalog
+	var publicUrl string
+	for i := range catalogList {
+		if catalogList[i].Name == "swift" || catalogList[i].Type == "object-store" {
+			for e := range catalogList[i].Endpoints {
+				if catalogList[i].Endpoints[e].Region == c.RegionName {
+					publicUrl = catalogList[i].Endpoints[e].PublicUrl
+				}
+			}
+		}
+	}
+	c.StorageUrl = publicUrl
+	c.Token = keystonev2res.Access.Token.Id
+	return err
 }
 
-func (c *Client) Credencial() error {
+func (c *Client) Credential() (err error) {
+	c.setClient()
 	u, _ := url.Parse(strings.Trim(c.AuthUrl, "/"))
 	ksver := strings.Split(u.Path, "/")[1]
 	swauthver := strings.Split(u.Path, "/")[2]
-	var err error
 	switch {
 	case swauthver == "v1.0":
 		err = c.SWAuthV1()
 	case ksver == "v2" || ksver == "v2.0":
-		err = c.KeyStoneAuthV2()
+		err = c.KeystoneAuthV2()
 	default:
 		err = errors.New("Check the API version. Support to v1 or v2.")
 	}
@@ -99,11 +193,10 @@ func (c *Client) setClient() {
 	}
 }
 
-func (c *Client) setCredencial() error {
-	var err error
+func (c *Client) setCredential() (err error) {
 	if c.AuthUrl != "" && c.AccountName != "" && c.Password != "" {
 		if c.Token == "" && c.StorageUrl == "" {
-			err = c.Credencial()
+			err = c.Credential()
 		}
 	}
 	if c.Token == "" || c.StorageUrl == "" {
@@ -114,7 +207,7 @@ func (c *Client) setCredencial() error {
 
 func (c *Client) request(method string, path string, body io.Reader, contentLength int64, header http.Header, params url.Values) ([]byte, map[string][]string, error) {
 	c.setClient()
-	if err := c.setCredencial(); err != nil {
+	if err := c.setCredential(); err != nil {
 		return nil, nil, err
 	}
 	urls := fmt.Sprintf("%s/%s", strings.Trim(c.StorageUrl, "/"), path)
