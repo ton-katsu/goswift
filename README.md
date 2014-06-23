@@ -8,7 +8,7 @@ This is a go client for the OpenStack Object Storage(Swift) APIv1.
 
 > Goswift supports Swauth(AuthV1) and Keystone(AuthV2).
 
-> "Transfer-Encoding: Chunked" support comming soon.
+> TODO: "Transfer-Encoding: Chunked" support.
 
 [![GoDoc](https://godoc.org/github.com/ton-katsu/goswift?status.png)](https://godoc.org/github.com/ton-katsu/goswift)
 
