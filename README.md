@@ -6,8 +6,7 @@ This is a go client for the OpenStack Object Storage(Swift) APIv1.
 
 [http://docs.openstack.org/api/openstack-object-storage/1.0/content/](http://docs.openstack.org/api/openstack-object-storage/1.0/content/)
 
-> Now support swauth(AuthV1) only.
-> Keystone(AuthV2) support comming soon.
+> Goswift supports Swauth(AuthV1) and Keystone(AuthV2).
 
 > "Transfer-Encoding: Chunked" support comming soon.
 
@@ -86,13 +85,23 @@ Example
 Testing
 -------
 
-Set environment variables
+Set environment variables for Swauth(AuthV1)
+
+ex)
 
     export SWIFT_API_USER='accountname'
     export SWIFT_API_KEY='password'
     export SWIFT_AUTH_URL='https://xxxxx.com/auth/v1.0'
-    export SWIFT_USER_TOKEN='xxxxxxx'
-    export SWIFT_STORAGE_URL='https://xxxxx.com/v1/xxxxx'
+
+Set environment variables for Keystone(AuthV2)
+
+ex)
+
+    export SWIFT_API_USER='username'
+    export SWIFT_API_KEY='password'
+    export SWIFT_AUTH_URL='https://xxxxx:5000/v2.0/tokens'
+    export SWIFT_TENANT_NAME='tenantname'
+    export SWIFT_REGION_NAME='regionname'
 
 After that, run test.
 

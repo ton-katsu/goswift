@@ -37,20 +37,6 @@ func TestShowAccountMetaWithAuthUrl(t *testing.T) {
 	header, err := c.ShowAccountMeta()
 	if err != nil {
 		t.Errorf("Expected error: %s", err)
-	}
-	if v, ok := header["X-Account-Bytes-Used"]; ok == true {
-		t.Log("X-Account-Bytes-Used", v[0])
-	}
-	if v, ok := header["X-Account-Container-Count"]; ok == true {
-		t.Log("X-Account-Container-Count", v[0])
-	}
-}
-
-func TestShowAccountMetaWithKeystoneV2Auth(t *testing.T) {
-	c := Client{AuthUrl: AuthUrl, AccountName: AccountName, Password: Password, TenantName: TenantName, RegionName: RegionName, SkipSecure: true}
-	header, err := c.ShowAccountMeta()
-	if err != nil {
-		t.Errorf("Expected error: %s", err)
 	} else {
 		t.Log(header)
 	}
@@ -59,16 +45,6 @@ func TestShowAccountMetaWithKeystoneV2Auth(t *testing.T) {
 	}
 	if v, ok := header["X-Account-Container-Count"]; ok == true {
 		t.Log("X-Account-Container-Count", v[0])
-	}
-}
-
-func TestListContainersWithKeystoneV2Auth(t *testing.T) {
-	c := Client{AuthUrl: AuthUrl, AccountName: AccountName, Password: Password, TenantName: TenantName, RegionName: RegionName, SkipSecure: true}
-	res, _, err := c.ListContainers()
-	if err != nil {
-		t.Errorf("Expected error: %s", err)
-	} else {
-		t.Log(len(res))
 	}
 }
 
