@@ -123,7 +123,7 @@ func (c *Client) SWAuthV1() error {
 func (c *Client) KeystoneAuthV2() error {
 	a := KeystoneV2Req{Credentials{UserPass{c.AccountName, c.Password}, c.TenantName}}
 	b, _ := json.Marshal(a)
-	req, _ := http.NewRequest("POST", AuthUrl, bytes.NewReader(b))
+	req, _ := http.NewRequest("POST", c.AuthUrl, bytes.NewReader(b))
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Client.Do(req)
